@@ -47,8 +47,45 @@ namespace SmtpMailDeneme.Services
             {
                 //Log Exception Details
                 return false;
-            }   
+            }     
         }
+        public bool SendVerificationEmail(EmailData emailModel)
+        {
+            try
+            {
+                string verificationCode = GenerateRandomCode();
+                emailModel.EmailBody += $"\nOnay kodunuz: {verificationCode}";
+
+                MimeMessage emailMessage = new MimeMessage();
+
+                MailboxAddress emailFrom = new MailboxAddress(_emailSettings.Name, _emailSettings.EmailId);
+                emailMessage.From.Add(emailFrom);
+
+                MailboxAddress emailTo = new MailboxAddress(emailModel.EmailToName, emailModel.EmailToId);
+                emailMessage.To.Add(emailTo);
+
+                emailMessage.Subject = emailModel.EmailSubject;
+
+                BodyBuilder emailBodyBuilder = new BodyBuilder();
+                emailBodyBuilder.TextBody = emailModel.EmailBody;
+                emailMessage.Body = emailBodyBuilder.ToMessageBody();
+
+                MailKit.Net.Smtp.SmtpClient emailClient = new MailKit.Net.Smtp.SmtpClient();
+                emailClient.Connect(_emailSettings.Host, _emailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
+                emailClient.Authenticate(_emailSettings.EmailId, _emailSettings.Password);
+                emailClient.Send(emailMessage);
+                emailClient.Disconnect(true);
+                emailClient.Dispose();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log Exception Details
+                return false;
+            }
+        }
+
         public string GenerateRandomCode()
         {
             Random random = new Random();

@@ -11,6 +11,8 @@ namespace SmtpMailDeneme.Controller
     public class EmailController : ControllerBase
     {
         private readonly IEmailService _emailService = null;
+        private readonly IVerificationCodeService _verificationCodeService;
+        private string savedVerificationCode;
         public EmailController(IEmailService emailService)
         {
             _emailService = emailService;
@@ -39,6 +41,14 @@ namespace SmtpMailDeneme.Controller
 
             // Onay kodunu döndür
             return Ok(verificationCode);
+        }
+        [HttpGet("CheckVerificationCode")]
+        public IActionResult CheckVerificationCode(string userEmail, string verificationCode)
+        {
+            bool isVerificationCodeValid = _verificationCodeService.CheckVerificationCode(userEmail, verificationCode);
+
+            // Doğrulama kodunun doğru olup olmadığına göre sonucu döndürün:
+            return Ok(isVerificationCodeValid);
         }
     }
 

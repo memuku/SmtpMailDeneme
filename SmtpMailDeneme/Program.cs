@@ -1,6 +1,7 @@
 ﻿using MailKit;
 using Microsoft.Extensions.Configuration;
 using SmtpMailDeneme.Configuration;
+using SmtpMailDeneme.Data;
 using SmtpMailDeneme.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(nameof(EmailSettings)));
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddSingleton(typeof(MongoDBService<VerificationCode>));
+builder.Services.AddTransient<IVerificationCodeService, VerificationCodeService>();
+builder.Services.AddHostedService<VerificationCodeCleanupService>();
+
 
 var app = builder.Build();
 
